@@ -1,0 +1,31 @@
+# Toilet Tissue-ness Game 🧻
+
+An interactive game where you predict which random image the AI model thinks looks most like toilet tissue.
+
+## Setup
+
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+## Play
+
+```bash
+jupyter notebook play.ipynb
+```
+
+Run all cells and predict which image the AI rates highest for toilet tissue-ness!
+
+## How It Works
+
+- Uses ResNet50 (ImageNet pre-trained) to score random images
+- Target class: 999 (toilet tissue, toilet paper, bathroom tissue)
+- Your goal: Predict which image the AI model will score highest
+
+## Future Ideas
+
+- **Pygame Implementation**: Create a standalone game with GUI using pygame
+- **Other Categories**: Try different categories like cats vs dogs
+- **Other Models**: Try different models (VGG16, MobileNet, etc.) and compare predictions
