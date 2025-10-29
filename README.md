@@ -1,5 +1,7 @@
 # Toilet Tissue-ness Game 🧻
 
+[![Latest Release](https://img.shields.io/github/v/release/taka-sho-1231/toilet-tissue-ness?display_name=tag)](https://github.com/taka-sho-1231/toilet-tissue-ness/releases/latest)
+
 An interactive game where you predict which random image the AI model thinks looks most like toilet tissue.
 
 ## Setup
