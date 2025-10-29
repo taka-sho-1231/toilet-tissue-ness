@@ -17,6 +17,19 @@ jobs:
           echo "This PR is from the ${{ github.head_ref }} branch."
           exit 1 # Exit with error code 1 to mark this job as "failed"
       
+      - name: 'Check if version label exists'
+        # Check if PR has one of the required labels: major, minor, or patch
+        run: |
+          labels=$(jq -r '.pull_request.labels[].name' <<< '${{ toJson(github.event) }}')
+          echo "PR labels: $labels"
+          
+          if echo "$labels" | grep -qiE "^(major|minor|patch)$"; then
+            echo "OK: Version label found."
+          else
+            echo "Error: PR must have a version label (major, minor, or patch)."
+            exit 1
+          fi
+      
       - name: 'Check OK'
         # If the PR source branch name is 'dev'
         if: github.head_ref == 'dev'
