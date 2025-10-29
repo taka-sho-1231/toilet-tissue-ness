@@ -4,19 +4,19 @@ An interactive game where you predict which random image the AI model thinks loo
 
 ## Setup
 
+**Requirements:** Python 3.10+
+
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+Note: This installs the default PyTorch version. For GPU support, see [PyTorch installation guide](https://pytorch.org/get-started/locally/).
+
 ## Play
 
-```bash
-jupyter notebook play.ipynb
-```
-
-Run all cells and predict which image the AI rates highest for toilet tissue-ness!
+Open `play.ipynb` and run all cells. Predict which image the AI rates highest for toilet tissue-ness!
 
 ## How It Works
 
