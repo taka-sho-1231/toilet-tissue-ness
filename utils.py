@@ -3,6 +3,8 @@ from io import BytesIO
 from pathlib import Path
 import random
 from typing import Optional, Tuple, Union
+import time
+import warnings
 
 import numpy as np
 from PIL import Image
@@ -16,25 +18,61 @@ def get_random_image(dir_path: Optional[Union[str, Path]] = None, size: Tuple[in
     width, height = size
 
     if dir_path and isinstance(dir_path, str) and dir_path.startswith(("http://", "https://")):
-        try:
-            resp = requests.get(dir_path, timeout=10)
-            resp.raise_for_status()
-            img = Image.open(BytesIO(resp.content)).convert("RGB")
-            if img.size != (width, height):
-                img = img.resize((width, height), Image.LANCZOS)
-            return img
-        except Exception as e:
-            raise ValueError(f"Failed to fetch image from URL: {e}")
+        # Try a few times before falling back. Network errors / 5xx may be transient.
+        retries = 3
+        backoff = 0.5
+        last_exc = None
+        for attempt in range(retries):
+            try:
+                resp = requests.get(dir_path, timeout=10)
+                resp.raise_for_status()
+                img = Image.open(BytesIO(resp.content)).convert("RGB")
+                if img.size != (width, height):
+                    img = img.resize((width, height), Image.LANCZOS)
+                return img
+            except requests.RequestException as e:
+                last_exc = e
+                if attempt < retries - 1:
+                    time.sleep(backoff * (2 ** attempt))
+                    continue
+                warnings.warn(f"Failed to fetch image from URL after {retries} attempts: {e}")
+            except Exception as e:
+                # PIL might raise OSError when opening/decoding
+                last_exc = e
+                warnings.warn(f"Failed to open image from URL: {e}")
+
+        # Fallback: return a neutral placeholder image instead of raising.
+        placeholder = Image.new("RGB", (width, height), color=(128, 128, 128))
+        return placeholder
 
     if online:
-        try:
-            url = f"https://picsum.photos/{width}/{height}"
-            resp = requests.get(url, timeout=10)
-            resp.raise_for_status()
-            img = Image.open(BytesIO(resp.content)).convert("RGB")
-            return img
-        except Exception as e:
-            raise ValueError(f"Failed to fetch image online: {e}")
+        # Use retries + backoff because remote image service can return 5xx intermittently.
+        retries = 3
+        backoff = 0.5
+        last_exc = None
+        # Add a cache-busting query to reduce chance of cached errors
+        url = f"https://picsum.photos/{width}/{height}?random={random.randint(0, 2**31 - 1)}"
+        for attempt in range(retries):
+            try:
+                resp = requests.get(url, timeout=10)
+                resp.raise_for_status()
+                img = Image.open(BytesIO(resp.content)).convert("RGB")
+                if img.size != (width, height):
+                    img = img.resize((width, height), Image.LANCZOS)
+                return img
+            except requests.RequestException as e:
+                last_exc = e
+                if attempt < retries - 1:
+                    time.sleep(backoff * (2 ** attempt))
+                    continue
+                warnings.warn(f"Failed to fetch image online after {retries} attempts: {e}")
+            except Exception as e:
+                last_exc = e
+                warnings.warn(f"Failed to open online image: {e}")
+
+        # Fallback placeholder if remote service unavailable.
+        placeholder = Image.new("RGB", (width, height), color=(128, 128, 128))
+        return placeholder
 
     if dir_path:
         p = Path(dir_path)
@@ -115,9 +153,16 @@ def acquire_images(num_images: int, size: int, online: bool = True) -> list[Imag
     """Acquire multiple images."""
     images = []
     for i in range(num_images):
-        img = get_random_image(online=online, size=(size, size))
-        images.append(img)
-        print(f"Image {i+1}/{num_images} acquired")
+        try:
+            img = get_random_image(online=online, size=(size, size))
+            images.append(img)
+            print(f"Image {i+1}/{num_images} acquired")
+        except Exception as e:
+            # If something unexpected happens, append a placeholder and continue
+            warnings.warn(f"Failed to acquire image {i+1}: {e} -- adding placeholder image and continuing.")
+            placeholder = Image.new("RGB", (size, size), color=(128, 128, 128))
+            images.append(placeholder)
+            print(f"Image {i+1}/{num_images} -- placeholder used")
     return images
 
 
