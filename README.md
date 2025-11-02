@@ -1,7 +1,7 @@
 # Toilet Tissue-ness Game 🧻
 
 [![Latest Release](https://img.shields.io/github/v/release/taka-sho-1231/toilet-tissue-ness?display_name=tag)](https://github.com/taka-sho-1231/toilet-tissue-ness/releases/latest)
-[![Build](https://github.com/taka-sho-1231/toilet-tissue-ness/actions/workflows/check-pr-source.yaml/badge.svg)](https://github.com/taka-sho-1231/toilet-tissue-ness/actions/workflows/check-pr-source.yaml)
+[![Stars](https://img.shields.io/github/stars/taka-sho-1231/toilet-tissue-ness)](https://github.com/taka-sho-1231/toilet-tissue-ness/stargazers)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](#setup)
 [![Contributing](https://img.shields.io/badge/Contributing-Guide-informational)](./CONTRIBUTING.md)
 
